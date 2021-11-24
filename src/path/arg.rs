@@ -1,7 +1,8 @@
 //! This module defines the `Arg` trait and implements it for several common
 //! string types.
 
-use crate::ffi::{ZStr, ZString};
+#[allow(unused_imports)]
+use crate::ffi::{ZStr, ZString, ZStrExt};
 use crate::io;
 #[cfg(feature = "itoa")]
 use crate::path::DecInt;
