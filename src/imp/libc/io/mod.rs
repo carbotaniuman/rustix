@@ -1,6 +1,10 @@
 mod error;
-#[cfg(not(windows))]
+
 #[cfg(not(feature = "std"))]
+#[cfg_attr(not(windows), path = "io_slice.rs")]
+mod io_slice;
+#[cfg(not(feature = "std"))]
+#[cfg_attr(windows, path = "io_slice_windows.rs")]
 mod io_slice;
 mod poll_fd;
 #[cfg(not(windows))]
@@ -41,7 +45,6 @@ pub(crate) mod syscalls {
     }
 }
 
-#[cfg(not(windows))]
 #[cfg(not(feature = "std"))]
 pub use io_slice::{IoSlice, IoSliceMut};
 #[cfg(any(target_os = "android", target_os = "linux"))]

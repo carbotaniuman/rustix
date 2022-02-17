@@ -1,4 +1,8 @@
+#![allow(unsafe_code)]
+
 use bitflags::bitflags;
+use core::{mem::MaybeUninit, ptr};
+use linux_raw_sys::general::msghdr;
 
 bitflags! {
     /// `MSG_*`
@@ -37,5 +41,30 @@ bitflags! {
         const TRUNC = linux_raw_sys::general::MSG_TRUNC;
         /// `MSG_WAITALL`
         const WAITALL = linux_raw_sys::general::MSG_WAITALL;
+        /// `MSG_CTRUNC`
+        const CTRUNC = linux_raw_sys::general::MSG_CTRUNC;
+    }
+}
+
+/// Safely creates an initialized, but empty `struct msghdr`.
+#[inline]
+pub(crate) fn msghdr_default() -> msghdr {
+    // Needed, as in some cases not all fields are accessible.
+
+    let mut hdr = MaybeUninit::<msghdr>::zeroed();
+    // This is not actually safe yet, only after we have set all the
+    // values below.
+    unsafe {
+        let ptr = hdr.as_mut_ptr();
+        (*ptr).msg_name = ptr::null_mut();
+        (*ptr).msg_namelen = 0;
+        (*ptr).msg_iov = ptr::null_mut();
+        (*ptr).msg_iovlen = 0;
+        (*ptr).msg_control = ptr::null_mut();
+        (*ptr).msg_controllen = 0;
+        (*ptr).msg_flags = 0;
+
+        // now hdr is actually fully initialized
+        hdr.assume_init()
     }
 }
